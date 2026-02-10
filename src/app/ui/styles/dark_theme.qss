@@ -1,0 +1,213 @@
+QWidget {
+    background: #171a20;
+    color: #d8dbe2;
+    font-family: "Segoe UI", "Noto Sans", sans-serif;
+    font-size: 13px;
+}
+
+QMainWindow {
+    background: #171a20;
+}
+
+QGroupBox#Card {
+    border: 1px solid #2f3641;
+    border-radius: 12px;
+    margin-top: 12px;
+    padding-top: 14px;
+    background: #1f242c;
+    font-weight: 600;
+}
+
+QGroupBox#Card::title {
+    subcontrol-origin: margin;
+    subcontrol-position: top left;
+    left: 12px;
+    padding: 0 6px;
+    color: #a8b0bd;
+    background: #1a1e25;
+    border-radius: 4px;
+}
+
+QPushButton {
+    border-radius: 10px;
+    padding: 7px 14px;
+    border: 1px solid #3c4552;
+    background: #2b323d;
+    color: #d9dde5;
+}
+
+QPushButton:hover {
+    border-color: #4a5463;
+    background: #353d4a;
+}
+
+QPushButton:pressed {
+    border-color: #37404c;
+    background: #252b35;
+}
+
+QPushButton#PrimaryButton {
+    background: #475366;
+    color: #e9ecf2;
+    border: 1px solid #586680;
+    font-weight: 600;
+}
+
+QPushButton#PrimaryButton:hover {
+    background: #526077;
+    border-color: #667694;
+}
+
+QPushButton#PrimaryButton:pressed {
+    background: #3e4959;
+    border-color: #4e5c72;
+}
+
+QPushButton#GhostButton {
+    background: #232932;
+    border: 1px solid #3a4350;
+    color: #d3d8e1;
+}
+
+QComboBox,
+QLineEdit {
+    border: 1px solid #3a4350;
+    border-radius: 10px;
+    padding: 7px 10px;
+    background: #191d24;
+    color: #d9dce3;
+    selection-background-color: #49576b;
+    selection-color: #eef1f6;
+}
+
+QComboBox:focus,
+QLineEdit:focus {
+    border-color: #617086;
+    background: #1d222a;
+}
+
+QComboBox::drop-down {
+    border: none;
+    width: 18px;
+}
+
+QComboBox QAbstractItemView {
+    border: 1px solid #2f3641;
+    border-radius: 8px;
+    background: #212730;
+    color: #d8dce3;
+    padding: 4px;
+    selection-background-color: #465367;
+    selection-color: #edf1f6;
+    outline: 0;
+}
+
+QLabel#SubtleLabel {
+    color: #9ea7b4;
+}
+
+QFrame#StatusBanner {
+    border-radius: 10px;
+    border: 1px solid #343d4b;
+    background: #242b35;
+}
+
+QFrame#StatusBanner[statusLevel="info"] {
+    border-color: #3d4757;
+    background: #29313d;
+}
+
+QFrame#StatusBanner[statusLevel="success"] {
+    border-color: #445349;
+    background: #2b352d;
+}
+
+QFrame#StatusBanner[statusLevel="warning"] {
+    border-color: #544d3f;
+    background: #363126;
+}
+
+QFrame#StatusBanner[statusLevel="error"] {
+    border-color: #554346;
+    background: #362a2d;
+}
+
+QLabel#StatusBannerLabel {
+    font-weight: 600;
+    color: #dfe3eb;
+}
+
+QTableWidget {
+    background: #1a1f27;
+    alternate-background-color: #212730;
+    border: 1px solid #303845;
+    border-radius: 10px;
+    gridline-color: #2d3541;
+    selection-background-color: #47556a;
+    selection-color: #eef2f8;
+}
+
+QHeaderView::section {
+    background: #252c36;
+    color: #d8dce3;
+    border: none;
+    border-right: 1px solid #323b48;
+    border-bottom: 1px solid #323b48;
+    padding: 8px 10px;
+    font-weight: 600;
+}
+
+QTableCornerButton::section {
+    background: #252c36;
+    border: none;
+    border-right: 1px solid #323b48;
+    border-bottom: 1px solid #323b48;
+}
+
+QScrollBar:vertical {
+    background: #1e242d;
+    width: 10px;
+    margin: 3px 2px 3px 2px;
+}
+
+QScrollBar::handle:vertical {
+    background: #424b59;
+    border-radius: 5px;
+    min-height: 24px;
+}
+
+QScrollBar::handle:vertical:hover {
+    background: #4f5968;
+}
+
+QScrollBar:horizontal {
+    background: #1e242d;
+    height: 10px;
+    margin: 2px 3px 2px 3px;
+}
+
+QScrollBar::handle:horizontal {
+    background: #424b59;
+    border-radius: 5px;
+    min-width: 24px;
+}
+
+QScrollBar::handle:horizontal:hover {
+    background: #4f5968;
+}
+
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical,
+QScrollBar::add-line:horizontal,
+QScrollBar::sub-line:horizontal {
+    width: 0;
+    height: 0;
+}
+
+QToolTip {
+    background: #252c36;
+    color: #dfe3eb;
+    border: 1px solid #3a4350;
+    border-radius: 6px;
+    padding: 4px 8px;
+}
