@@ -31,7 +31,16 @@ class IExcelGateway(Protocol):
     def read_preview(self, path: str) -> list[dict]:
         ...
 
+    def read_excel_data(self, path: str):
+        """Read Excel file and return DataFrame."""
+        ...
+
 
 class IDetectorGateway(Protocol):
     def detect(self, model: ModelRecord, rows: list[dict]) -> list[DetectRowResult]:
         ...
+
+    def detect_from_excel(self, model: ModelRecord, excel_df, excel_filename: str = "data") -> list[DetectRowResult]:
+        """Run detection on Excel DataFrame."""
+        ...
+

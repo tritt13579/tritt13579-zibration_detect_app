@@ -1,8 +1,57 @@
-.venv/
+# Python
 __pycache__/
-*.pyc
-.pytest_cache/
+*.py[cod]
+*$py.class
+*.so
+.Python
 
-# Local data artifacts
-data/models/*.pt
-data/state/*.bak
+# Virtual Environments
+venv/
+env/
+ENV/
+.venv/
+*.egg-info/
+dist/
+build/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Project specific
+.env
+*.log
+
+# Model files
+*.pt
+*.pth
+*.ckpt
+History_*/
+
+# Data files
+Dulieu/
+data/
+*.npy
+
+# Excel files (except sample)
+*.xlsx
+!T1.xlsx
+
+# Pytest
+.pytest_cache/
+.coverage
+htmlcov/
+
+# MyPy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Application state
+.app_state/
+app_state.json
+model_registry.json
