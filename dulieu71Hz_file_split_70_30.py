@@ -130,9 +130,18 @@ def _mean_std_from_train(train_index: List[Tuple[str, int, int, str]], cfg: Duli
         sumsq_c += (w * w).sum(axis=0)
         count += w.shape[0]
 
+    if count == 0:
+        raise ValueError(
+            "No clean training windows found to compute normalization mean/std. "
+            "Check window/step settings and dataset length."
+        )
+
     mean = sum_c / max(count, 1)
     var = sumsq_c / max(count, 1) - mean * mean
     std = np.sqrt(np.maximum(var, 0.0))
+
+    if not np.all(np.isfinite(mean)) or not np.all(np.isfinite(std)):
+        raise ValueError("Computed mean/std contain non-finite values.")
 
     return mean.astype(np.float32), std.astype(np.float32)
 

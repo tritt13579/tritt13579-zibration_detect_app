@@ -110,6 +110,61 @@ def plot_confusion_matrix(y_true, y_pred, num_classes, out_path_png, title="Conf
     plt.close()
 
 
+def _to_list_float(x):
+    if x is None:
+        return None
+    return np.asarray(x, dtype=np.float32).tolist()
+
+
+def _build_checkpoint_payload(
+    model,
+    classes,
+    cfg,
+    meta,
+    best_epoch,
+    best_val_loss,
+    history,
+    base_filters,
+    dropout,
+    weight_decay,
+    use_amp,
+):
+    mean = _to_list_float(meta.get("mean"))
+    std = _to_list_float(meta.get("std"))
+
+    if mean is None or std is None:
+        raise ValueError("Checkpoint requires normalization parameters: meta.mean/meta.std")
+    if len(mean) != int(cfg.channels) or len(std) != int(cfg.channels):
+        raise ValueError(
+            f"Normalization shape mismatch: len(mean)={len(mean)}, len(std)={len(std)}, channels={cfg.channels}"
+        )
+
+    meta_out = dict(meta)
+    meta_out["mean"] = mean
+    meta_out["std"] = std
+
+    payload = {
+        "checkpoint_format": "zibration_detect_app_cnn1d_v1",
+        "model_state_dict": model.state_dict(),
+        "classes": list(classes),
+        "cfg": dict(cfg.__dict__),
+        "meta": meta_out,
+        "best_epoch": best_epoch,
+        "best_val_loss": best_val_loss,
+        "history": history,
+        "cnn1d_params": {
+            "base_filters": base_filters,
+            "dropout": dropout,
+            "weight_decay": weight_decay,
+            "use_amp": use_amp,
+        },
+        # Convenience mirrors for legacy/fallback readers.
+        "mean": mean,
+        "std": std,
+    }
+    return payload
+
+
 @torch.no_grad()
 def eval_loop(model, loader, criterion, device):
     model.eval()
@@ -223,6 +278,9 @@ def train_cnn1d_file_split_70_30(
     )
     print(f"[DATA] Train samples: {meta['train_samples']} | Val samples: {meta['val_samples']}")
 
+    if meta.get("mean") is None or meta.get("std") is None:
+        raise ValueError("Data loader did not return normalization parameters mean/std.")
+
     model = SimpleCNN1D(
         num_classes=len(classes),
         input_channels=cfg.channels,
@@ -310,22 +368,21 @@ def train_cnn1d_file_split_70_30(
         if val_loss < best_val_loss:
             best_val_loss = val_loss
             best_epoch = epoch
+            checkpoint_payload = _build_checkpoint_payload(
+                model=model,
+                classes=classes,
+                cfg=cfg,
+                meta=meta,
+                best_epoch=best_epoch,
+                best_val_loss=best_val_loss,
+                history=history,
+                base_filters=base_filters,
+                dropout=dropout,
+                weight_decay=weight_decay,
+                use_amp=use_amp,
+            )
             torch.save(
-                {
-                    "model_state_dict": model.state_dict(),
-                    "classes": classes,
-                    "cfg": cfg.__dict__,
-                    "meta": meta,
-                    "best_epoch": best_epoch,
-                    "best_val_loss": best_val_loss,
-                    "history": history,
-                    "cnn1d_params": {
-                        "base_filters": base_filters,
-                        "dropout": dropout,
-                        "weight_decay": weight_decay,
-                        "use_amp": use_amp,
-                    },
-                },
+                checkpoint_payload,
                 ckpt_path,
             )
             print(f"[CKPT] Saved best -> {ckpt_path} (epoch={best_epoch}, val_loss={best_val_loss:.4f})")

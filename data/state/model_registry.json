@@ -1,4 +1,12 @@
 {
-  "models": [],
+  "models": [
+    {
+      "id": "e3084119-5db5-4e51-b1b1-37c574cfc48a",
+      "display_name": "best (20260223035250)",
+      "stored_path": "C:\\Users\\tritt\\Desktop\\Study\\DATN\\zibration_detect_app\\data\\models\\20260223035250_best.pt",
+      "original_name": "best.pt",
+      "created_at": "2026-02-23T03:52:50.273896+00:00"
+    }
+  ],
   "version": 1
 }
