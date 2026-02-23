@@ -6,6 +6,13 @@
       "stored_path": "C:\\Users\\tritt\\Desktop\\Study\\DATN\\zibration_detect_app\\data\\models\\20260223035250_best.pt",
       "original_name": "best.pt",
       "created_at": "2026-02-23T03:52:50.273896+00:00"
+    },
+    {
+      "id": "99f799f9-f135-4a79-a66c-2cd86b83dba8",
+      "display_name": "cnn1d_dulieu71Hz_file_70_30_best_v4 (20260223073749)",
+      "stored_path": "C:\\Users\\tritt\\Desktop\\Study\\DATN\\zibration_detect_app\\data\\models\\20260223073749_cnn1d_dulieu71hz_file_70_30_best_v4.pt",
+      "original_name": "cnn1d_dulieu71Hz_file_70_30_best_v4.pt",
+      "created_at": "2026-02-23T07:37:49.694851+00:00"
     }
   ],
   "version": 1

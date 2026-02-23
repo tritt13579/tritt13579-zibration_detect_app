@@ -11,7 +11,6 @@ from app.config.paths import (
     APP_STATE_PATH,
     MODEL_REGISTRY_PATH,
     MODELS_DIR,
-    THEME_PATH,
     ensure_project_dirs,
 )
 from app.config.settings import AppSettings
@@ -38,8 +37,6 @@ def build_application() -> tuple[QApplication, MainWindow, MainController]:
 
     app = QApplication.instance() or QApplication(sys.argv)
     settings = AppSettings()
-
-    _apply_stylesheet(app)
 
     json_store = JsonStore()
     model_repository = ModelRepository(
@@ -70,9 +67,3 @@ def _ensure_default_state_files() -> None:
         json_store.write_json(MODEL_REGISTRY_PATH, DEFAULT_MODEL_REGISTRY)
     if not APP_STATE_PATH.exists():
         json_store.write_json(APP_STATE_PATH, DEFAULT_APP_STATE)
-
-
-
-def _apply_stylesheet(app: QApplication) -> None:
-    if THEME_PATH.exists():
-        app.setStyleSheet(THEME_PATH.read_text(encoding="utf-8"))

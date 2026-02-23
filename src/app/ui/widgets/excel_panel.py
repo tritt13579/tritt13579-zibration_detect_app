@@ -1,44 +1,48 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from PySide6.QtCore import Signal
-from PySide6.QtWidgets import QGroupBox, QHBoxLayout, QLineEdit, QPushButton, QVBoxLayout
+from PySide6.QtWidgets import (
+    QGroupBox,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QPushButton,
+    QVBoxLayout,
+)
 
 
 class ExcelPanel(QGroupBox):
     browse_requested = Signal()
-    load_requested = Signal()
 
-    def __init__(self) -> None:
-        super().__init__("Step 2 - Excel")
-        self.setObjectName("Card")
+    def __init__(self, parent=None) -> None:
+        super().__init__("Excel File", parent)
 
-        root_layout = QVBoxLayout(self)
-        root_layout.setContentsMargins(12, 12, 12, 12)
-        root_layout.setSpacing(10)
+        root = QVBoxLayout(self)
+        root.setContentsMargins(8, 12, 8, 8)
+        root.setSpacing(6)
 
         row = QHBoxLayout()
-        row.setSpacing(8)
+        row.setSpacing(6)
 
-        self.path_edit = QLineEdit()
-        self.path_edit.setObjectName("PathInput")
-        self.path_edit.setPlaceholderText("Choose an Excel file (.xlsx or .xls)")
-        self.path_edit.setReadOnly(True)
-        row.addWidget(self.path_edit, stretch=1)
+        self._path_edit = QLineEdit()
+        self._path_edit.setPlaceholderText("No file selected")
+        self._path_edit.setReadOnly(True)
+        row.addWidget(self._path_edit, stretch=1)
 
-        self.browse_button = QPushButton("Browse")
-        self.browse_button.setObjectName("GhostButton")
-        self.browse_button.clicked.connect(self.browse_requested.emit)
-        row.addWidget(self.browse_button)
+        self._browse_btn = QPushButton("Browse...")
+        row.addWidget(self._browse_btn)
 
-        self.load_button = QPushButton("Load")
-        self.load_button.setObjectName("PrimaryButton")
-        self.load_button.clicked.connect(self.load_requested.emit)
-        row.addWidget(self.load_button)
+        root.addLayout(row)
 
-        root_layout.addLayout(row)
+        self._browse_btn.clicked.connect(self.browse_requested)
+
+    # ------------------------------------------------------------------
+    # Public API
+    # ------------------------------------------------------------------
 
     def set_path(self, path: str) -> None:
-        self.path_edit.setText(path)
+        self._path_edit.setText(path)
+        self._path_edit.setToolTip(path)
 
     def path(self) -> str:
-        return self.path_edit.text()
+        return self._path_edit.text()

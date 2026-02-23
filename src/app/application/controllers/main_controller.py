@@ -24,7 +24,6 @@ class MainController:
         self._window.model_panel.add_model_requested.connect(self._on_add_model)
         self._window.model_panel.model_changed.connect(self._on_model_changed)
         self._window.excel_panel.browse_requested.connect(self._on_browse_excel)
-        self._window.excel_panel.load_requested.connect(self._on_load_excel)
         self._window.action_panel.run_detect_requested.connect(self._on_run_detect)
 
     def initialize(self) -> None:
@@ -43,7 +42,7 @@ class MainController:
         else:
             self._window.show_status(
                 "success",
-                "Ready. Choose an Excel file and load preview rows.",
+                "Ready. Choose an Excel file to auto-load and run detect.",
             )
 
     def _refresh_models(self, preferred_model_id: str | None = None) -> None:
@@ -100,20 +99,17 @@ class MainController:
         if not file_path:
             return
         self._window.excel_panel.set_path(file_path)
-        self._window.show_status("info", "Excel selected. Click Load to prepare rows.")
+        self._load_excel_from_path(file_path)
 
-    def _on_load_excel(self) -> None:
-        path = self._window.excel_panel.path().strip()
-        if not path:
-            self._window.show_status("warning", "Please choose an Excel file first.")
-            return
+    def _load_excel_from_path(self, path: str) -> None:
+        """Load selected Excel into memory for detection."""
 
         try:
             self._preview_rows = self._detect_service.load_excel_preview(path)
             self._window.result_table.clear_results()
             self._window.show_status(
                 "success",
-                f"Loaded {len(self._preview_rows)} rows from Excel (mock preview).",
+                "Excel loaded and ready for detect.",
             )
         except Exception as exc:  # noqa: BLE001
             self._window.show_status("error", str(exc))
@@ -125,7 +121,7 @@ class MainController:
             return
 
         if not self._preview_rows:
-            self._window.show_status("warning", "Please load Excel rows before running detect.")
+            self._window.show_status("warning", "Please choose an Excel file before running detect.")
             return
 
         model = self._model_service.get_model(model_id)
@@ -136,6 +132,6 @@ class MainController:
         try:
             results = self._detect_service.run_detect(model, self._preview_rows)
             self._window.result_table.set_results(results)
-            self._window.show_status("success", f"Detect completed: {len(results)} rows.")
+            self._window.show_status("success", "Detect completed: 1 aggregated file-level result.")
         except Exception as exc:  # noqa: BLE001
             self._window.show_status("error", str(exc))

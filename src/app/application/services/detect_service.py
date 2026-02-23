@@ -49,7 +49,7 @@ class DetectService:
             rows: Legacy parameter, not used (kept for compatibility)
             
         Returns:
-            Detection results for each window in the Excel data
+            Detection result(s) for the loaded Excel file
             
         Raises:
             ValueError: If no Excel data has been loaded

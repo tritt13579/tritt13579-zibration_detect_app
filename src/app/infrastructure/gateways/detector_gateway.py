@@ -36,7 +36,7 @@ class DetectorGateway:
         excel_df,
         excel_filename: str = "data",
     ) -> list[DetectRowResult]:
-        """Run real detection on Excel DataFrame.
+        """Run file-level detection on Excel DataFrame.
         
         Args:
             model: Model record with path to .pt file
@@ -44,7 +44,7 @@ class DetectorGateway:
             excel_filename: Name of Excel file for display purposes
             
         Returns:
-            List of detection results, one per window
+            List with one aggregated detection result for the whole file
             
         Raises:
             FileNotFoundError: If model file not found
@@ -70,6 +70,9 @@ class DetectorGateway:
         cfg = checkpoint.get("cfg", {})
         cnn1d_params = checkpoint.get("cnn1d_params", {})
         meta = checkpoint.get("meta", {})
+
+        if not classes:
+            raise ValueError("Model checkpoint missing classes metadata")
 
         channels = cfg.get("channels", 3)
         window = cfg.get("window", 2048)
@@ -113,29 +116,21 @@ class DetectorGateway:
         with torch.no_grad():
             logits = cnn_model(batch)
             probs = torch.softmax(logits, dim=1)
-            scores, predictions = torch.max(probs, dim=1)
+            mean_probs = probs.mean(dim=0)
+            confidence, prediction = torch.max(mean_probs, dim=0)
 
-        predictions = predictions.cpu().numpy()
-        scores = scores.cpu().numpy()
+        pred_class_idx = int(prediction.item())
+        pred_confidence = float(confidence.item())
+        class_name = classes[pred_class_idx] if pred_class_idx < len(classes) else f"Class_{pred_class_idx}"
+        status = "high_confidence" if pred_confidence > 0.8 else "review"
 
-        results: list[DetectRowResult] = []
-        for idx in range(num_windows):
-            pred_class_idx = int(predictions[idx])
-            confidence = float(scores[idx])
-
-            class_name = classes[pred_class_idx] if pred_class_idx < len(classes) else f"Class_{pred_class_idx}"
-
-            status = "high_confidence" if confidence > 0.8 else "review"
-
-            results.append(
-                DetectRowResult(
-                    row_index=idx + 1,
-                    input_preview=f"{excel_filename} (window {idx + 1}/{num_windows})",
-                    prediction=class_name,
-                    score=confidence,
-                    status=status,
-                )
+        return [
+            DetectRowResult(
+                row_index=1,
+                input_preview=f"{excel_filename} ({num_windows} windows, mean_probability)",
+                prediction=class_name,
+                score=pred_confidence,
+                status=status,
             )
-
-        return results
+        ]
 

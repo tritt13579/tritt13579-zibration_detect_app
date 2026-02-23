@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from PySide6.QtWidgets import (
     QAbstractItemView,
@@ -12,38 +12,43 @@ from PySide6.QtWidgets import (
 from app.domain.entities import DetectRowResult
 
 
+_HEADERS = ["#", "Input", "Prediction", "Score", "Status"]
+
+
 class ResultTable(QGroupBox):
-    HEADERS = ["Row", "Input", "Prediction", "Score", "Status"]
+    def __init__(self, parent=None) -> None:
+        super().__init__("Detection Results", parent)
 
-    def __init__(self) -> None:
-        super().__init__("Detection Results")
-        self.setObjectName("Card")
+        root = QVBoxLayout(self)
+        root.setContentsMargins(8, 12, 8, 8)
+        root.setSpacing(4)
 
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(12, 12, 12, 12)
+        self._table = QTableWidget(0, len(_HEADERS))
+        self._table.setHorizontalHeaderLabels(_HEADERS)
+        self._table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
+        self._table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
+        self._table.setAlternatingRowColors(True)
+        self._table.verticalHeader().setVisible(False)
+        self._table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
+        self._table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
+        self._table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
+        self._table.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)
+        self._table.horizontalHeader().setSectionResizeMode(4, QHeaderView.ResizeMode.ResizeToContents)
 
-        self.table = QTableWidget(0, len(self.HEADERS))
-        self.table.setHorizontalHeaderLabels(self.HEADERS)
-        self.table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
-        self.table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
-        self.table.setAlternatingRowColors(True)
-        self.table.verticalHeader().setVisible(False)
+        root.addWidget(self._table)
 
-        header = self.table.horizontalHeader()
-        header.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
-        header.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
-        header.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
-        header.setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)
-        header.setSectionResizeMode(4, QHeaderView.ResizeMode.ResizeToContents)
-
-        layout.addWidget(self.table)
+    # ------------------------------------------------------------------
+    # Public API
+    # ------------------------------------------------------------------
 
     def clear_results(self) -> None:
-        self.table.setRowCount(0)
+        self._table.setRowCount(0)
 
     def set_results(self, results: list[DetectRowResult]) -> None:
-        self.table.setRowCount(0)
-        for row_index, result in enumerate(results):
-            self.table.insertRow(row_index)
-            for col_index, value in enumerate(result.to_table_row()):
-                self.table.setItem(row_index, col_index, QTableWidgetItem(value))
+        self._table.setRowCount(0)
+        for result in results:
+            row_data = result.to_table_row()
+            row_idx = self._table.rowCount()
+            self._table.insertRow(row_idx)
+            for col, value in enumerate(row_data):
+                self._table.setItem(row_idx, col, QTableWidgetItem(str(value)))
