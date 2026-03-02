@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from app.domain.entities import DetectRowResult, ModelRecord
+from app.domain.entities import DetectReport, ModelRecord
 from app.domain.protocols import IAppStateRepository, IDetectorGateway, IExcelGateway
 
 
@@ -41,7 +41,7 @@ class DetectService:
     def get_last_excel_path(self) -> str | None:
         return self._app_state_repository.load().last_excel_path
 
-    def run_detect(self, model: ModelRecord, rows: list[dict]) -> list[DetectRowResult]:
+    def run_detect(self, model: ModelRecord, rows: list[dict]) -> DetectReport:  # noqa: ARG002
         """Run detection using stored Excel DataFrame.
         
         Args:
@@ -49,7 +49,7 @@ class DetectService:
             rows: Legacy parameter, not used (kept for compatibility)
             
         Returns:
-            Detection result(s) for the loaded Excel file
+            Detection report for the loaded Excel file
             
         Raises:
             ValueError: If no Excel data has been loaded

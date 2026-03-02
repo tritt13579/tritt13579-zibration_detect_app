@@ -115,8 +115,11 @@ class MainController:
             return
 
         try:
-            results = self._detect_service.run_detect(model, self._preview_rows)
-            self._window.result_table.set_results(results)
-            self._window.show_status("success", "Detect completed: 1 aggregated file-level result.")
+            report = self._detect_service.run_detect(model, self._preview_rows)
+            self._window.result_table.set_report(report)
+            self._window.show_status(
+                "success",
+                f"Detect completed: {report.prediction} ({report.confidence * 100:.1f}%).",
+            )
         except Exception as exc:  # noqa: BLE001
             self._window.show_status("error", str(exc))

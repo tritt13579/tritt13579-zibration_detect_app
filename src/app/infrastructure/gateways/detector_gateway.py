@@ -1,51 +1,70 @@
 from __future__ import annotations
 
+from datetime import datetime, timezone
 from pathlib import Path
+from time import perf_counter
 
-from app.domain.entities import DetectRowResult, ModelRecord
+from app.domain.entities import (
+    ClassProbability,
+    DetectReport,
+    ModelRecord,
+    WindowDetection,
+)
 
 
 class DetectorGateway:
     """Gateway for running vibration detection inference."""
 
-    def detect(self, model: ModelRecord, rows: list[dict]) -> list[DetectRowResult]:
+    def detect(self, model: ModelRecord, rows: list[dict]) -> DetectReport:
         """Run detection on Excel data rows.
-        
+
         Note: The 'rows' parameter is legacy from mock implementation.
         We now expect the Excel DataFrame to be loaded separately.
         This method will be called from DetectService with proper data.
         """
-        # This is a placeholder - actual detection happens in detect_from_excel
-        results: list[DetectRowResult] = []
-        for index, row in enumerate(rows, start=1):
-            input_preview = str(row.get("input", ""))
-            results.append(
-                DetectRowResult(
-                    row_index=index,
-                    input_preview=input_preview,
-                    prediction="N/A (use detect_from_excel)",
-                    score=0.0,
-                    status="pending",
-                )
+        generated_at = datetime.now(timezone.utc).isoformat()
+        window_detections = [
+            WindowDetection(
+                window_index=index,
+                sample_start=0,
+                sample_end=0,
+                prediction="N/A",
+                score=0.0,
+                status="pending",
             )
-        return results
+            for index, _ in enumerate(rows, start=1)
+        ]
+        return DetectReport(
+            excel_filename="data",
+            model_name=model.display_name,
+            prediction="N/A",
+            confidence=0.0,
+            status="pending",
+            num_windows=len(rows),
+            window_size=0,
+            step_size=0,
+            run_time_ms=0,
+            generated_at=generated_at,
+            class_probabilities=[],
+            window_detections=window_detections,
+        )
 
     def detect_from_excel(
         self,
         model: ModelRecord,
         excel_df,
         excel_filename: str = "data",
-    ) -> list[DetectRowResult]:
+    ) -> DetectReport:
         """Run file-level detection on Excel DataFrame.
-        
+
         Args:
             model: Model record with path to .pt file
             excel_df: pandas DataFrame with vibration data
             excel_filename: Name of Excel file for display purposes
-            
+
         Returns:
-            List with one aggregated detection result for the whole file
-            
+            Rich detection report for the whole file and all windows
+
         Raises:
             FileNotFoundError: If model file not found
             ValueError: If model checkpoint is invalid or data preprocessing fails
@@ -54,10 +73,11 @@ class DetectorGateway:
         # This prevents conflicts with PySide6
         import numpy as np
         import torch
-        
+
         from app.infrastructure.models import SimpleCNN1D
         from app.infrastructure.preprocessing import preprocess_excel_for_inference
-        
+
+        started_at = perf_counter()
         model_path = Path(model.stored_path)
         if not model_path.exists():
             raise FileNotFoundError(f"Model file not found: {model.stored_path}")
@@ -124,13 +144,54 @@ class DetectorGateway:
         class_name = classes[pred_class_idx] if pred_class_idx < len(classes) else f"Class_{pred_class_idx}"
         status = "high_confidence" if pred_confidence > 0.8 else "review"
 
-        return [
-            DetectRowResult(
-                row_index=1,
-                input_preview=f"{excel_filename} ({num_windows} windows, mean_probability)",
-                prediction=class_name,
-                score=pred_confidence,
-                status=status,
-            )
+        mean_prob_values = mean_probs.detach().cpu().tolist()
+        sorted_class_probs = sorted(
+            ((label, float(prob)) for label, prob in zip(classes, mean_prob_values)),
+            key=lambda item: item[1],
+            reverse=True,
+        )
+        class_probabilities = [
+            ClassProbability(rank=rank, class_name=label, probability=prob)
+            for rank, (label, prob) in enumerate(sorted_class_probs, start=1)
         ]
+
+        window_confidences, window_predictions = torch.max(probs, dim=1)
+        window_confidence_values = window_confidences.detach().cpu().tolist()
+        window_prediction_indices = window_predictions.detach().cpu().tolist()
+        window_detections: list[WindowDetection] = []
+        for index, (window_pred_idx, window_conf) in enumerate(
+            zip(window_prediction_indices, window_confidence_values),
+            start=1,
+        ):
+            window_class = classes[window_pred_idx] if window_pred_idx < len(classes) else f"Class_{window_pred_idx}"
+            window_status = "high_confidence" if window_conf > 0.8 else "review"
+            sample_start = (index - 1) * step
+            sample_end = sample_start + window - 1
+            window_detections.append(
+                WindowDetection(
+                    window_index=index,
+                    sample_start=sample_start,
+                    sample_end=sample_end,
+                    prediction=window_class,
+                    score=float(window_conf),
+                    status=window_status,
+                )
+            )
+
+        elapsed_ms = int((perf_counter() - started_at) * 1000)
+
+        return DetectReport(
+            excel_filename=excel_filename,
+            model_name=model.display_name,
+            prediction=class_name,
+            confidence=pred_confidence,
+            status=status,
+            num_windows=num_windows,
+            window_size=window,
+            step_size=step,
+            run_time_ms=elapsed_ms,
+            generated_at=datetime.now(timezone.utc).isoformat(),
+            class_probabilities=class_probabilities,
+            window_detections=window_detections,
+        )
 

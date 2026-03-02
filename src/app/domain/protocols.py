@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Protocol
 
-from app.domain.entities import AppState, DetectRowResult, ModelRecord
+from app.domain.entities import AppState, DetectReport, ModelRecord
 
 
 class IModelRepository(Protocol):
@@ -37,10 +37,10 @@ class IExcelGateway(Protocol):
 
 
 class IDetectorGateway(Protocol):
-    def detect(self, model: ModelRecord, rows: list[dict]) -> list[DetectRowResult]:
+    def detect(self, model: ModelRecord, rows: list[dict]) -> DetectReport:
         ...
 
-    def detect_from_excel(self, model: ModelRecord, excel_df, excel_filename: str = "data") -> list[DetectRowResult]:
+    def detect_from_excel(self, model: ModelRecord, excel_df, excel_filename: str = "data") -> DetectReport:
         """Run detection on Excel DataFrame."""
         ...
 

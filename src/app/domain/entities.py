@@ -70,3 +70,36 @@ class DetectRowResult:
             f"{self.score:.3f}",
             self.status,
         ]
+
+
+@dataclass(slots=True)
+class ClassProbability:
+    rank: int
+    class_name: str
+    probability: float
+
+
+@dataclass(slots=True)
+class WindowDetection:
+    window_index: int
+    sample_start: int
+    sample_end: int
+    prediction: str
+    score: float
+    status: str
+
+
+@dataclass(slots=True)
+class DetectReport:
+    excel_filename: str
+    model_name: str
+    prediction: str
+    confidence: float
+    status: str
+    num_windows: int
+    window_size: int
+    step_size: int
+    run_time_ms: int
+    generated_at: str
+    class_probabilities: list[ClassProbability]
+    window_detections: list[WindowDetection]
