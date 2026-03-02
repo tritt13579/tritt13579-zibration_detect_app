@@ -30,10 +30,6 @@ class MainController:
         self._model_service.mark_opened()
         self._refresh_models()
 
-        last_excel_path = self._detect_service.get_last_excel_path()
-        if last_excel_path:
-            self._window.excel_panel.set_path(last_excel_path)
-
         if not self._model_service.list_models():
             self._window.show_status(
                 "info",
@@ -49,13 +45,6 @@ class MainController:
         models = self._model_service.list_models()
         selected_id = preferred_model_id or self._model_service.get_recent_model_id()
         self._window.model_panel.set_models(models, selected_id)
-
-        if selected_id:
-            model = self._model_service.get_model(selected_id)
-            if model:
-                self._window.model_panel.set_active_model_text(model.display_name)
-                return
-        self._window.model_panel.set_active_model_text("No model selected")
 
     def _on_add_model(self) -> None:
         file_path, _ = QFileDialog.getOpenFileName(
@@ -77,17 +66,14 @@ class MainController:
     def _on_model_changed(self, model_id: str) -> None:
         if not model_id:
             self._model_service.set_active_model(None)
-            self._window.model_panel.set_active_model_text("No model selected")
             return
 
         model = self._model_service.get_model(model_id)
         if model is None:
             self._window.show_status("error", "Selected model does not exist.")
-            self._window.model_panel.set_active_model_text("No model selected")
             return
 
         self._model_service.set_active_model(model.id)
-        self._window.model_panel.set_active_model_text(model.display_name)
 
     def _on_browse_excel(self) -> None:
         file_path, _ = QFileDialog.getOpenFileName(
@@ -106,7 +92,6 @@ class MainController:
 
         try:
             self._preview_rows = self._detect_service.load_excel_preview(path)
-            self._window.result_table.clear_results()
             self._window.show_status(
                 "success",
                 "Excel loaded and ready for detect.",

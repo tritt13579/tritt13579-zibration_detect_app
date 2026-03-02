@@ -5,7 +5,6 @@ from PySide6.QtWidgets import (
     QComboBox,
     QGroupBox,
     QHBoxLayout,
-    QLabel,
     QPushButton,
     QVBoxLayout,
 )
@@ -36,9 +35,6 @@ class ModelPanel(QGroupBox):
         row.addWidget(self._add_btn)
 
         root.addLayout(row)
-
-        self._active_label = QLabel("No model selected")
-        root.addWidget(self._active_label)
 
         # wiring
         self._add_btn.clicked.connect(self.add_model_requested)
@@ -82,6 +78,3 @@ class ModelPanel(QGroupBox):
         if idx <= 0:
             return ""
         return self._model_ids[idx - 1]
-
-    def set_active_model_text(self, label: str) -> None:
-        self._active_label.setText(label)
