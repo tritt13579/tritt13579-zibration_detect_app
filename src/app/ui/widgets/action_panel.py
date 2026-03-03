@@ -26,3 +26,7 @@ class ActionPanel(QGroupBox):
         row.addWidget(self._run_btn)
 
         self._run_btn.clicked.connect(self.run_detect_requested)
+
+    def set_busy(self, busy: bool) -> None:
+        self._run_btn.setEnabled(not busy)
+        self._run_btn.setText("Detecting..." if busy else "Run Detect")

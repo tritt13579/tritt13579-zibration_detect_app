@@ -46,3 +46,7 @@ class ExcelPanel(QGroupBox):
 
     def path(self) -> str:
         return self._path_edit.text()
+
+    def set_busy(self, busy: bool) -> None:
+        self._browse_btn.setEnabled(not busy)
+        self._browse_btn.setText("Loading..." if busy else "Browse...")

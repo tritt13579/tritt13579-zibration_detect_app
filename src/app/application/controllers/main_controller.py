@@ -56,12 +56,15 @@ class MainController:
         if not file_path:
             return
 
+        self._window.set_busy(True, "Importing model...")
         try:
             model = self._model_service.import_model(file_path)
             self._refresh_models(model.id)
             self._window.show_status("success", f"Model imported: {Path(file_path).name}")
         except Exception as exc:  # noqa: BLE001
             self._window.show_status("error", str(exc))
+        finally:
+            self._window.set_busy(False)
 
     def _on_model_changed(self, model_id: str) -> None:
         if not model_id:
@@ -85,7 +88,11 @@ class MainController:
         if not file_path:
             return
         self._window.excel_panel.set_path(file_path)
-        self._load_excel_from_path(file_path)
+        self._window.set_busy(True, "Loading Excel file...")
+        try:
+            self._load_excel_from_path(file_path)
+        finally:
+            self._window.set_busy(False)
 
     def _load_excel_from_path(self, path: str) -> None:
         """Load selected Excel into memory for detection."""
@@ -114,6 +121,7 @@ class MainController:
             self._window.show_status("error", "Selected model is unavailable.")
             return
 
+        self._window.set_busy(True, "Running detect...")
         try:
             report = self._detect_service.run_detect(model, self._preview_rows)
             self._window.result_table.set_report(report)
@@ -123,3 +131,5 @@ class MainController:
             )
         except Exception as exc:  # noqa: BLE001
             self._window.show_status("error", str(exc))
+        finally:
+            self._window.set_busy(False)

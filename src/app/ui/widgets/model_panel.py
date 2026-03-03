@@ -78,3 +78,7 @@ class ModelPanel(QGroupBox):
         if idx <= 0:
             return ""
         return self._model_ids[idx - 1]
+
+    def set_busy(self, busy: bool) -> None:
+        self._combo.setEnabled(not busy)
+        self._add_btn.setEnabled(not busy)
