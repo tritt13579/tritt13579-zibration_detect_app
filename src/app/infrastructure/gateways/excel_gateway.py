@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from app.infrastructure.compat import patch_six_meta_path_importer_path_attr
+
 
 class ExcelGateway:
     SUPPORTED_EXTENSIONS = {".xlsx", ".xls"}
@@ -26,10 +28,12 @@ class ExcelGateway:
             FileNotFoundError: If file doesn't exist
             ValueError: If file format is not supported
         """
-        # Lazy import pandas to avoid conflicts with PySide6
-        import pandas as pd
-        
         self.validate_excel_path(path)
+
+        patch_six_meta_path_importer_path_attr()
+
+        # Lazy import pandas to avoid loading it at app startup.
+        import pandas as pd
         return pd.read_excel(path, engine="openpyxl")
 
     def read_preview(self, path: str) -> list[dict]:
